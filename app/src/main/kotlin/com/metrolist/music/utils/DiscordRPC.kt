@@ -15,8 +15,8 @@ class DiscordRPC(
             name = "Tones",
             details = song.song.title,
             state = song.song.artistName ?: song.artists.joinToString { it.name },
-            largeImage = song.song.thumbnailUrl?.let { RpcImage.ExternalImage(it) },
-            smallImage = RpcImage.ExternalImage("https://raw.githubusercontent.com/mostafaalagamy/Metrolist/main/logo.png"),
+            largeImage = song.song.thumbnailUrl?.let { RpcImage.ExternalImage(it) } ?: RpcImage.DiscordImage("logo"),
+            smallImage = song.artists.firstOrNull()?.thumbnailUrl?.let { RpcImage.ExternalImage(it) } ?: RpcImage.DiscordImage("logo"),
             largeText = song.album?.title,
             smallText = song.artists.firstOrNull()?.name,
             buttons = listOf(
