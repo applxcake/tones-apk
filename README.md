@@ -1,5 +1,7 @@
 # Tones
 
+> **Built on [Metrolist](https://github.com/mostafaalagamy/Metrolist) by Mostafa Alagamy**
+
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 
 A custom music streaming app built on top of Metrolist with enhanced features.
@@ -40,4 +42,5 @@ A custom music streaming app built on top of Metrolist with enhanced features.
 
 ## License
 
-This is a modified version of Metrolist. Please refer to the original project for licensing information.
+This is a modified version of [Metrolist](https://github.com/mostafaalagamy/Metrolist), originally created by **Mostafa Alagamy**.
+Please refer to the original project for licensing information.
