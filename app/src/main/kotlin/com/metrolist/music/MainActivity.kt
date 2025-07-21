@@ -163,12 +163,11 @@ import com.metrolist.music.ui.utils.appBarScrollBehavior
 import com.metrolist.music.ui.utils.backToMain
 import com.metrolist.music.ui.utils.resetHeightOffset
 import com.metrolist.music.utils.SyncUtils
-import com.metrolist.music.utils.Updater
-import com.metrolist.music.utils.dataStore
-import com.metrolist.music.utils.get
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.utils.reportException
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
 import com.metrolist.music.viewmodels.HomeViewModel
 import com.valentinilk.shimmer.LocalShimmerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -184,6 +183,7 @@ import java.net.URLEncoder
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
+import androidx.compose.ui.text.font.FontWeight
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
@@ -237,10 +237,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (dataStore.get(
-                StopMusicOnTaskClearKey,
-                false
-            ) && playerConnection?.isPlaying?.value == true && isFinishing
+        if (applicationContext.dataStore.get(StopMusicOnTaskClearKey, false) == true &&
+            playerConnection?.isPlaying?.value == true && isFinishing
         ) {
             stopService(Intent(this, MusicService::class.java))
             unbindService(serviceConnection)
@@ -265,7 +263,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         lifecycleScope.launch {
-            dataStore.data
+            applicationContext.dataStore.data
                 .map { it[DisableScreenshotKey] ?: false }
                 .distinctUntilChanged()
                 .collectLatest {
@@ -282,11 +280,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LaunchedEffect(Unit) {
-                if (System.currentTimeMillis() - Updater.lastCheckTime > 1.days.inWholeMilliseconds) {
-                    Updater.getLatestVersionName().onSuccess {
-                        latestVersionName = it
-                    }
-                }
+                // Remove all Updater and update badge logic from setContent and UI
             }
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
@@ -371,7 +365,7 @@ class MainActivity : ComponentActivity() {
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                     val defaultOpenTab =
                         remember {
-                            dataStore[DefaultOpenTabKey].toEnum(defaultValue = NavigationTab.HOME)
+                            applicationContext.dataStore[DefaultOpenTabKey].toEnum(defaultValue = NavigationTab.HOME)
                         }
                     val tabOpenedFromShortcut =
                         remember {
@@ -417,7 +411,7 @@ class MainActivity : ComponentActivity() {
                         if (it.isNotEmpty()) {
                             onActiveChange(false)
                             navController.navigate("search/${URLEncoder.encode(it, "UTF-8")}")
-                            if (dataStore[PauseSearchHistoryKey] != true) {
+                            if (applicationContext.dataStore[PauseSearchHistoryKey] != true) {
                                 database.query {
                                     insert(SearchHistory(query = it))
                                 }
@@ -626,11 +620,30 @@ class MainActivity : ComponentActivity() {
                                 if (shouldShowTopBar) {
                                     TopAppBar(
                                         title = {
-                                            Text(
-                                                text = currentTitleRes?.let { stringResource(it) }
-                                                    ?: "",
-                                                style = MaterialTheme.typography.titleLarge,
-                                            )
+                                            if (navBackStackEntry?.destination?.route == Screens.Home.route) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    androidx.compose.foundation.Image(
+                                                        painter = painterResource(id = R.drawable.logo),
+                                                        contentDescription = "Tones Logo",
+                                                        modifier = Modifier.size(28.dp)
+                                                    )
+                                                    Text(
+                                                        text = "Tones",
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(start = 10.dp)
+                                                    )
+                                                }
+                                            } else {
+                                                Text(
+                                                    text = currentTitleRes?.let { stringResource(it) }
+                                                        ?: "",
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                )
+                                            }
                                         },
                                         actions = {
                                             IconButton(onClick = { navController.navigate("history") }) {
@@ -647,9 +660,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                             IconButton(onClick = { showAccountDialog = true }) {
                                                 BadgedBox(badge = {
-                                                    if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                                        Badge()
-                                                    }
+                                                    // Remove all Updater and update badge logic from setContent and UI
                                                 }) {
                                                     if (accountImageUrl != null) {
                                                         AsyncImage(
@@ -832,7 +843,7 @@ class MainActivity : ComponentActivity() {
                                                                     )
                                                                 }"
                                                             )
-                                                            if (dataStore[PauseSearchHistoryKey] != true) {
+                                                            if (applicationContext.dataStore[PauseSearchHistoryKey] != true) {
                                                                 database.query {
                                                                     insert(SearchHistory(query = it))
                                                                 }

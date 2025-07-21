@@ -64,7 +64,6 @@ import com.metrolist.music.constants.VisitorDataKey
 import com.metrolist.music.constants.YtmSyncKey
 import com.metrolist.music.ui.component.InfoLabel
 import com.metrolist.music.ui.component.PreferenceEntry
-import com.metrolist.music.ui.component.ReleaseNotesCard
 import com.metrolist.music.ui.component.SwitchPreference
 import com.metrolist.music.ui.component.TextFieldDialog
 import com.metrolist.music.utils.rememberPreference
@@ -293,21 +292,11 @@ fun AccountSettings(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceContainer)
             )
-
             Spacer(Modifier.height(4.dp))
-
             PreferenceEntry(
                 title = { Text(stringResource(R.string.settings)) },
                 icon = {
-                    BadgedBox(
-                        badge = {
-                            if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                Badge()
-                            }
-                        }
-                    ) {
-                        Icon(painterResource(R.drawable.settings), contentDescription = null)
-                    }
+                    Icon(painterResource(R.drawable.settings), contentDescription = null)
                 },
                 onClick = {
                     onClose()
@@ -317,25 +306,7 @@ fun AccountSettings(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceContainer)
             )
-
             Spacer(Modifier.height(4.dp))
-
-            if (latestVersionName != BuildConfig.VERSION_NAME) {
-                PreferenceEntry(
-                    title = {
-                        Text(text = stringResource(R.string.new_version_available))
-                    },
-                    description = latestVersionName,
-                    icon = {
-                        BadgedBox(badge = { Badge() }) {
-                            Icon(painterResource(R.drawable.update), null)
-                        }
-                    },
-                    onClick = {
-                        uriHandler.openUri("https://github.com/mostafaalagamy/Metrolist/releases/latest/download/Metrolist.apk")
-                    }
-                )
-            }
         }
     }
 }

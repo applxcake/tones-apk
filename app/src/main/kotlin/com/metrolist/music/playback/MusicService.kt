@@ -258,6 +258,19 @@ class MusicService :
                     sleepTimer = SleepTimer(scope, this)
                     addListener(sleepTimer)
                     addAnalyticsListener(PlaybackStatsListener(false, this@MusicService))
+                    addListener(object : Player.Listener {
+                        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                            super.onMediaItemTransition(mediaItem, reason)
+                            mediaItem?.mediaId?.let { mediaId ->
+                                scope.launch {
+                                    val song = database.song(mediaId).first()
+                                    if (song != null) {
+                                        discordRpc?.updateSong(song)
+                                    }
+                                }
+                            }
+                        }
+                    })
                 }
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager

@@ -26,7 +26,6 @@ import com.metrolist.music.LocalPlayerAwareWindowInsets
 import com.metrolist.music.R
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.PreferenceEntry
-import com.metrolist.music.ui.component.ReleaseNotesCard
 import com.metrolist.music.ui.utils.backToMain
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +33,6 @@ import com.metrolist.music.ui.utils.backToMain
 fun SettingsScreen(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
-    latestVersionName: String,
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
@@ -130,27 +128,6 @@ fun SettingsScreen(
             icon = { Icon(painterResource(R.drawable.info), null) },
             onClick = { navController.navigate("settings/about") }
         )
-        if (latestVersionName != BuildConfig.VERSION_NAME) {
-            PreferenceEntry(
-                title = {
-                    Text(
-                        text = stringResource(R.string.new_version_available),
-                    )
-                },
-                description = latestVersionName,
-                icon = {
-                    BadgedBox(
-                        badge = { Badge() }
-                    ) {
-                        Icon(painterResource(R.drawable.update), null)
-                    }
-                },
-                onClick = {
-                    uriHandler.openUri("https://github.com/mostafaalagamy/Metrolist/releases/latest/download/Metrolist.apk")
-                }
-            )
-            ReleaseNotesCard()
-        }
     }
 
     TopAppBar(

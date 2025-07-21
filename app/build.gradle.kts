@@ -65,9 +65,9 @@ android {
         }
         create("release") {
             storeFile = file("keystore/release.keystore")
-            storePassword = System.getenv("STORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
+            storePassword = "tonesrelease"
+            keyAlias = "release"
+            keyPassword = "tonesrelease"
         }
         getByName("debug") {
             keyAlias = "androiddebugkey"
@@ -85,6 +85,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -96,6 +97,12 @@ android {
             } else {
                 signingConfigs.getByName("persistentDebug")
             }
+        }
+        create("profiler") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("persistentDebug")
+            isDebuggable = false
+            applicationIdSuffix = ".profiler"
         }
     }
 

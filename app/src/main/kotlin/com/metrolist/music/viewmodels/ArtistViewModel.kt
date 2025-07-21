@@ -23,6 +23,7 @@ class ArtistViewModel @Inject constructor(
 ) : ViewModel() {
     val artistId = savedStateHandle.get<String>("artistId")!!
     var artistPage by mutableStateOf<ArtistPage?>(null)
+    var errorMessage by mutableStateOf<String?>(null)
     val libraryArtist = database.artist(artistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
     val librarySongs = database.artistSongsPreview(artistId)
@@ -41,11 +42,18 @@ class ArtistViewModel @Inject constructor(
                     val filteredSections = page.sections.filterNot { section ->
                         section.title.equals("From your library", ignoreCase = true)
                     }
-
                     artistPage = page.copy(sections = filteredSections)
+                    errorMessage = null
                 }.onFailure {
+                    val msg = it.localizedMessage ?: "Failed to load artist profile."
+                    if (msg.contains("NOT_FOUND", ignoreCase = true) || msg.contains("not found", ignoreCase = true)) {
+                        errorMessage = "This is a local artist. Online profile is not available."
+                    } else {
+                        errorMessage = msg
+                    }
                     reportException(it)
                 }
         }
     }
+    fun clearError() { errorMessage = null }
 }

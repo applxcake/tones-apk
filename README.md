@@ -1,4 +1,6 @@
-# Tones APK
+# Tones
+
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 
 A custom music streaming app built on top of Metrolist with enhanced features.
 
@@ -13,7 +15,7 @@ A custom music streaming app built on top of Metrolist with enhanced features.
 
 ## Installation
 
-1. Download the APK file: `Tones-APK.apk`
+1. Download the APK file: `Tones-Universal.apk`
 2. Enable "Install from Unknown Sources" in your Android settings
 3. Install the APK file
 4. Open the app and log in with your YouTube account
@@ -32,7 +34,7 @@ A custom music streaming app built on top of Metrolist with enhanced features.
 
 ## Build Information
 
-- Version: 12.2.0
+- Version: 2.0.0
 - Architecture: Universal (supports all CPU architectures)
 - Build Type: Release
 

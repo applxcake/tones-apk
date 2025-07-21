@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -284,6 +285,7 @@ fun Thumbnail(
                                 modifier = Modifier
                                     .size(containerMaxWidth - (PlayerHorizontalPadding * 2))
                                     .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
+                                    .shadow(12.dp, RoundedCornerShape(ThumbnailCornerRadius * 2)) // Add shadow for 3D effect
                             ) {
                                 // Blurred background
                                 AsyncImage(

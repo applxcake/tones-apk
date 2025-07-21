@@ -68,9 +68,8 @@ fun AboutScreen(
         Spacer(Modifier.height(4.dp))
 
         Image(
-            painter = painterResource(R.drawable.about_splash),
+            painter = painterResource(R.drawable.logo),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground, BlendMode.SrcIn),
             modifier = Modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -149,7 +148,7 @@ fun AboutScreen(
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = "MO AGAMY",
+            text = "Bala Aditya",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -158,7 +157,7 @@ fun AboutScreen(
 
         Row {
             IconButton(
-                onClick = { uriHandler.openUri("https://github.com/mostafaalagamy/metrolist") },
+                onClick = { uriHandler.openUri("https://github.com/applxcake") },
             ) {
                 Icon(
                     painter = painterResource(R.drawable.github),
@@ -167,7 +166,7 @@ fun AboutScreen(
             }
 
             IconButton(
-                onClick = { uriHandler.openUri("https://www.instagram.com/mostafaalagamy") }
+                onClick = { uriHandler.openUri("https://www.instagram.com/kxlmn/") }
             ) {
                 Icon(
                     painter = painterResource(R.drawable.instagram),

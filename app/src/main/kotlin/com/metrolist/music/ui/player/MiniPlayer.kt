@@ -215,6 +215,17 @@ fun MiniPlayer(
                 }
             }
 
+            // Previous track button
+            IconButton(
+                enabled = canSkipPrevious,
+                onClick = playerConnection::seekToPrevious,
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.skip_previous),
+                    contentDescription = null,
+                )
+            }
+
             IconButton(
                 onClick = {
                     if (playbackState == Player.STATE_ENDED) {
