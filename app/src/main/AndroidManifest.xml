@@ -40,6 +40,7 @@
             android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|smallestScreenSize|density"
             android:theme="@style/Theme.Tones"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -115,6 +116,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <!-- Shortcuts filter -->
+            <intent-filter>
+                <action android:name="com.metrolist.music.action.SEARCH" />
+                <action android:name="com.metrolist.music.action.LIBRARY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
             <meta-data

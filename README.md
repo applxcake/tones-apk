@@ -4,18 +4,27 @@
 
 > **Built on [Metrolist](https://github.com/mostafaalagamy/Metrolist) by Mostafa Alagamy**
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.5.0-blue)
 
 A custom music streaming app built on top of Metrolist with enhanced features.
 
 ## Features
 
-- 🎵 **Custom App Icon**: Replaced with your custom logo
-- 👤 **Profile Picture Persistence**: Profile picture from login is now displayed and persisted in the top-right corner of the home screen
-- 🎶 **Lyrics Integration**: Click on lyrics page to go back to thumbnail view
-- 📱 **Modern UI**: Built with Jetpack Compose
-- 🎧 **Music Streaming**: YouTube Music integration
-- 📚 **Library Management**: Local and online playlist support
+- 🎵 Custom app icon and branding
+- 👤 Profile picture persistence from YouTube login
+- 🎶 Lyrics integration with translation for instrumental tracks
+- 📱 Modern UI built with Jetpack Compose
+- 🎧 Music streaming via YouTube Music
+- 📚 Library management: local and online playlists
+- 🔍 Powerful search (songs, artists, albums)
+- 🖼️ Artist images in Discord Rich Presence
+- 🏠 Home screen with Quick Play and recommendations
+- 🗂️ Liked songs and favorites
+- 🖼️ 3D/elevated player thumbnail
+- 🌈 Appearance customization (player background blur, dark mode)
+- 🏷️ Song metadata and album art display
+- 🔗 App shortcuts: Search and Library from launcher
+- 🔄 Split-screen and configuration change support
 
 ## Installation
 
@@ -23,12 +32,6 @@ A custom music streaming app built on top of Metrolist with enhanced features.
 2. Enable "Install from Unknown Sources" in your Android settings
 3. Install the APK file
 4. Open the app and log in with your YouTube account
-
-## What's New
-
-- **Custom Branding**: App now uses your custom logo instead of the default Android robot icon
-- **Profile Picture Feature**: Your profile picture from YouTube login is now displayed in the top-right corner and persists across app restarts
-- **Enhanced Lyrics Navigation**: Click on empty areas of the lyrics page to return to the thumbnail view
 
 ## Requirements
 
@@ -38,8 +41,8 @@ A custom music streaming app built on top of Metrolist with enhanced features.
 
 ## Build Information
 
-- Version: 2.0.0
-- Architecture: Universal (supports all CPU architectures)
+- Version: 2.5.0
+- Architectures: Universal, arm64, armeabi, x86, x86_64
 - Build Type: Release
 
 ## License

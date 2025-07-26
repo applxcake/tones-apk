@@ -67,6 +67,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -127,6 +129,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
+import android.graphics.Shader
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -136,6 +141,7 @@ import kotlin.time.Duration.Companion.seconds
 fun Lyrics(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
+    navController: NavController, // Add this parameter
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
@@ -159,7 +165,7 @@ fun Lyrics(
 
     val playerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,
-        defaultValue = PlayerBackgroundStyle.DEFAULT
+        defaultValue = PlayerBackgroundStyle.BLUR
     )
 
     val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
@@ -503,105 +509,79 @@ fun Lyrics(
             } else {
                 itemsIndexed(
                     items = lines,
-                    key = { index, item -> "$index-${item.time}" } // Add stable key
+                    key = { index, item -> "$index-${item.time}" },
+                    contentType = { _, _ -> "lyric-line" } // Help LazyColumn recycle views
                 ) { index, item ->
                     val isSelected = selectedIndices.contains(index)
-                    val itemModifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp)) // Clip for background
-                        .combinedClickable(
-                            enabled = true,
-                            onClick = {
-                                if (isSelectionModeActive) {
-                                    // Toggle selection
-                                    if (isSelected) {
-                                        selectedIndices.remove(index)
-                                        if (selectedIndices.isEmpty()) {
-                                            isSelectionModeActive = false // Exit mode if last item deselected
-                                        }
-                                    } else {
-                                        if (selectedIndices.size < maxSelectionLimit) {
-                                            selectedIndices.add(index)
+                    // Precompute values outside the composable tree
+                    val isCurrentLine = (index == displayedCurrentLineIndex)
+                    val isDimmed = !isSynced && !isCurrentLine && !(isSelectionModeActive && isSelected)
+                    val alignment = when (lyricsTextPosition) {
+                        LyricsPosition.LEFT -> Alignment.CenterStart
+                        LyricsPosition.CENTER -> Alignment.Center
+                        LyricsPosition.RIGHT -> Alignment.CenterEnd
+                    }
+                    val textAlign = when (lyricsTextPosition) {
+                        LyricsPosition.LEFT -> TextAlign.Left
+                        LyricsPosition.CENTER -> TextAlign.Center
+                        LyricsPosition.RIGHT -> TextAlign.Right
+                    }
+                    // Use a single Box for each line for less layout overhead
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .then(
+                                if (isSelected && isSelectionModeActive) Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                else Modifier
+                            )
+                            .padding(horizontal = 24.dp, vertical = 8.dp)
+                            .alpha(if (isDimmed) 0.5f else 1f)
+                            .combinedClickable(
+                                enabled = true,
+                                onClick = {
+                                    if (isSelectionModeActive) {
+                                        if (isSelected) {
+                                            selectedIndices.remove(index)
+                                            if (selectedIndices.isEmpty()) isSelectionModeActive = false
                                         } else {
-                                            showMaxSelectionToast = true
+                                            if (selectedIndices.size < maxSelectionLimit) selectedIndices.add(index)
+                                            else showMaxSelectionToast = true
                                         }
+                                    } else if (isSynced && changeLyrics) {
+                                        playerConnection.player.seekTo(item.time)
+                                        scope.launch {
+                                            lazyListState.animateScrollToItem(
+                                                index,
+                                                with(density) { 36.dp.toPx().toInt() } +
+                                                        with(density) {
+                                                            val count = item.text.count { it == '\n' }
+                                                            (if (landscapeOffset) 16.dp.toPx() else 20.dp.toPx()).toInt() * count
+                                                        }
+                                            )
+                                        }
+                                        lastPreviewTime = 0L
                                     }
-                                } else if (isSynced && changeLyrics) {
-                                    // Seek action
-                                    playerConnection.player.seekTo(item.time)
-                                    scope.launch {
-                                        lazyListState.animateScrollToItem(
-                                            index,
-                                            with(density) { 36.dp.toPx().toInt() } +
-                                                    with(density) {
-                                                        val count = item.text.count { it == '\n' }
-                                                        (if (landscapeOffset) 16.dp.toPx() else 20.dp.toPx()).toInt() * count
-                                                    }
-                                        )
+                                },
+                                onLongClick = {
+                                    if (!isSelectionModeActive) {
+                                        isSelectionModeActive = true
+                                        selectedIndices.add(index)
+                                    } else if (!isSelected && selectedIndices.size < maxSelectionLimit) {
+                                        selectedIndices.add(index)
+                                    } else if (!isSelected) {
+                                        showMaxSelectionToast = true
                                     }
-                                    lastPreviewTime = 0L
                                 }
-                            },
-                            onLongClick = {
-                                if (!isSelectionModeActive) {
-                                    isSelectionModeActive = true
-                                    selectedIndices.add(index)
-                                } else if (!isSelected && selectedIndices.size < maxSelectionLimit) {
-                                    // If already in selection mode and item not selected, add it if below limit
-                                    selectedIndices.add(index)
-                                } else if (!isSelected) {
-                                    // If already at limit, show toast
-                                    showMaxSelectionToast = true
-                                }
-                            }
-                        )
-                        .background(
-                            if (isSelected && isSelectionModeActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                            else Color.Transparent
-                        )
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
-                        .alpha(
-                            if (!isSynced || index == displayedCurrentLineIndex || (isSelectionModeActive && isSelected)) 1f
-                            else 0.5f
-                        )
-
-                    Column(
-                        modifier = itemModifier,
-                        horizontalAlignment = when (lyricsTextPosition) {
-                            LyricsPosition.LEFT -> Alignment.Start
-                            LyricsPosition.CENTER -> Alignment.CenterHorizontally
-                            LyricsPosition.RIGHT -> Alignment.End
-                        }
+                            )
                     ) {
                         Text(
                             text = item.text,
-                            fontSize = 20.sp,
-                            color = textColor,
-                            textAlign = when (lyricsTextPosition) {
-                                LyricsPosition.LEFT -> TextAlign.Left
-                                LyricsPosition.CENTER -> TextAlign.Center
-                                LyricsPosition.RIGHT -> TextAlign.Right
-                            },
-                            fontWeight = FontWeight.Bold
+                            fontSize = if (isCurrentLine) 20.sp else 18.sp,
+                            color = Color.White,
+                            fontWeight = if (isCurrentLine) FontWeight.Bold else FontWeight.Normal,
+                            textAlign = textAlign,
+                            modifier = Modifier.align(alignment)
                         )
-                        if (romanizeJapaneseLyrics || romanizeKoreanLyrics) {
-                            // Show romanized text if available
-                            val romanizedText by item.romanizedTextFlow.collectAsState()
-                            romanizedText?.let { romanized ->
-                                Text(
-                                    text = romanized,
-                                    fontSize = 16.sp,
-                                    color = textColor.copy(alpha = 0.8f),
-                                    textAlign = when (lyricsTextPosition) {
-                                        LyricsPosition.LEFT -> TextAlign.Left
-                                        LyricsPosition.CENTER -> TextAlign.Center
-                                        LyricsPosition.RIGHT -> TextAlign.Right
-                                    },
-                                    fontWeight = FontWeight.Normal,
-                                    modifier = Modifier.padding(top = 2.dp)
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -680,11 +660,13 @@ fun Lyrics(
                     // Original More Button
                     IconButton(
                         onClick = {
+                            val navController = navController
                             menuState.show {
                                 LyricsMenu(
                                     lyricsProvider = { lyricsEntity },
                                     mediaMetadataProvider = { metadata },
-                                    onDismiss = menuState::dismiss
+                                    onDismiss = menuState::dismiss,
+                                    navController = navController
                                 )
                             }
                         }
@@ -692,6 +674,22 @@ fun Lyrics(
                         Icon(
                             painter = painterResource(id = R.drawable.more_horiz),
                             contentDescription = stringResource(R.string.more_options),
+                            tint = textColor
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                context.dataStore.edit { preferences ->
+                                    preferences[ShowLyricsKey] = false
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.close),
+                            contentDescription = stringResource(R.string.cancel),
                             tint = textColor
                         )
                     }
