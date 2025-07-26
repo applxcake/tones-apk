@@ -36,6 +36,12 @@ class ArtistViewModel @Inject constructor(
     }
 
     fun fetchArtistsFromYTM() {
+        // Validate artist ID before making the API call
+        if (artistId.isBlank() || artistId == "null") {
+            errorMessage = "Invalid artist ID. Cannot load artist profile."
+            return
+        }
+        
         viewModelScope.launch {
             YouTube.artist(artistId)
                 .onSuccess { page ->
@@ -44,14 +50,30 @@ class ArtistViewModel @Inject constructor(
                     }
                     artistPage = page.copy(sections = filteredSections)
                     errorMessage = null
-                }.onFailure {
-                    val msg = it.localizedMessage ?: "Failed to load artist profile."
-                    if (msg.contains("NOT_FOUND", ignoreCase = true) || msg.contains("not found", ignoreCase = true)) {
-                        errorMessage = "This is a local artist. Online profile is not available."
-                    } else {
-                        errorMessage = msg
+                }.onFailure { exception ->
+                    val msg = exception.localizedMessage ?: "Failed to load artist profile."
+                    
+                    // Handle different types of errors
+                    when {
+                        msg.contains("NOT_FOUND", ignoreCase = true) || 
+                        msg.contains("not found", ignoreCase = true) ||
+                        msg.contains("400", ignoreCase = true) ||
+                        msg.contains("INVALID_ARGUMENT", ignoreCase = true) -> {
+                            errorMessage = "This artist profile is not available online. It may be a local artist or the profile has been removed."
+                        }
+                        msg.contains("403", ignoreCase = true) || 
+                        msg.contains("FORBIDDEN", ignoreCase = true) -> {
+                            errorMessage = "Access to this artist profile is restricted."
+                        }
+                        msg.contains("500", ignoreCase = true) || 
+                        msg.contains("INTERNAL_ERROR", ignoreCase = true) -> {
+                            errorMessage = "YouTube Music is experiencing issues. Please try again later."
+                        }
+                        else -> {
+                            errorMessage = "Unable to load artist profile: $msg"
+                        }
                     }
-                    reportException(it)
+                    reportException(exception)
                 }
         }
     }

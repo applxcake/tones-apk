@@ -79,6 +79,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.round
+import android.widget.Toast
 
 @Composable
 fun PlayerMenu(
@@ -143,10 +144,16 @@ fun PlayerMenu(
                         .fillParentMaxWidth()
                         .height(ListItemHeight)
                         .clickable {
-                            navController.navigate("artist/${artist.id}")
-                            showSelectArtistDialog = false
-                            playerBottomSheetState.collapseSoft()
-                            onDismiss()
+                            val artistId = artist.id
+                            if (artistId != null && artistId.isNotBlank()) {
+                                navController.navigate("artist/$artistId")
+                                showSelectArtistDialog = false
+                                playerBottomSheetState.collapseSoft()
+                                onDismiss()
+                            } else {
+                                // Show a toast or handle the case where artist ID is null
+                                Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                            }
                         }
                         .padding(horizontal = 24.dp),
                 ) {
@@ -327,9 +334,15 @@ fun PlayerMenu(
                     },
                     modifier = Modifier.clickable {
                         if (mediaMetadata.artists.size == 1) {
-                            navController.navigate("artist/${mediaMetadata.artists[0].id}")
-                            playerBottomSheetState.collapseSoft()
-                            onDismiss()
+                            val artistId = mediaMetadata.artists[0].id
+                            if (artistId != null && artistId.isNotBlank()) {
+                                navController.navigate("artist/$artistId")
+                                playerBottomSheetState.collapseSoft()
+                                onDismiss()
+                            } else {
+                                // Show a toast or handle the case where artist ID is null
+                                Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             showSelectArtistDialog = true
                         }

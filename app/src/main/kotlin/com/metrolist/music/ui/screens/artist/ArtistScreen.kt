@@ -114,6 +114,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
 import coil.util.Logger
+import androidx.compose.material3.Icon
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -142,18 +143,44 @@ fun ArtistScreen(
 
     if (errorMessage != null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.error),
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = errorMessage,
-                    color = MaterialTheme.colorScheme.error,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(16.dp)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Button(onClick = {
-                    viewModel.clearError()
-                    viewModel.fetchArtistsFromYTM()
-                }) {
-                    Text("Retry")
+                Spacer(modifier = Modifier.height(24.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.clearError()
+                            navController.navigateUp()
+                        }
+                    ) {
+                        Text("Go Back")
+                    }
+                    Button(
+                        onClick = {
+                            viewModel.clearError()
+                            viewModel.fetchArtistsFromYTM()
+                        }
+                    ) {
+                        Text("Retry")
+                    }
                 }
             }
         }

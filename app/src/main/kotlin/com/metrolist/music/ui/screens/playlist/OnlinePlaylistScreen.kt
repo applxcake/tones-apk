@@ -261,10 +261,11 @@ fun OnlinePlaylistScreen(
                                                                 color = MaterialTheme.colorScheme.onBackground,
                                                             ).toSpanStyle(),
                                                     ) {
-                                                        if (artist.id != null) {
+                                                        val artistId = artist.id
+                                                        if (artistId != null && artistId.isNotBlank()) {
                                                             val link =
-                                                                LinkAnnotation.Clickable(artist.id!!) {
-                                                                    navController.navigate("artist/${artist.id!!}")
+                                                                LinkAnnotation.Clickable(artistId) {
+                                                                    navController.navigate("artist/$artistId")
                                                                 }
                                                             withLink(link) {
                                                                 append(artist.name)

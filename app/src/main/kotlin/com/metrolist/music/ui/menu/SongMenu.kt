@@ -91,6 +91,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.widget.Toast
 
 @Composable
 fun SongMenu(
@@ -290,9 +291,15 @@ fun SongMenu(
                     modifier = Modifier
                         .height(ListItemHeight)
                         .clickable {
-                            navController.navigate("artist/${artist.id}")
-                            showSelectArtistDialog = false
-                            onDismiss()
+                            val artistId = artist.id
+                            if (artistId != null && artistId.isNotBlank()) {
+                                navController.navigate("artist/$artistId")
+                                showSelectArtistDialog = false
+                                onDismiss()
+                            } else {
+                                // Show a toast or handle the case where artist ID is null
+                                Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                            }
                         }
                         .padding(horizontal = 12.dp),
                 ) {
@@ -682,8 +689,14 @@ fun SongMenu(
                 },
                 modifier = Modifier.clickable {
                     if (song.artists.size == 1) {
-                        navController.navigate("artist/${song.artists[0].id}")
-                        onDismiss()
+                        val artistId = song.artists[0].id
+                        if (artistId != null && artistId.isNotBlank()) {
+                            navController.navigate("artist/$artistId")
+                            onDismiss()
+                        } else {
+                            // Show a toast or handle the case where artist ID is null
+                            Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         showSelectArtistDialog = true
                     }

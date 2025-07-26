@@ -77,6 +77,7 @@ import com.metrolist.music.utils.makeTimeString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import android.widget.Toast
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -135,9 +136,15 @@ fun YouTubeSongMenu(
                     Modifier  
                         .height(ListItemHeight)  
                         .clickable {  
-                            navController.navigate("artist/${artist.id}")  
-                            showSelectArtistDialog = false  
-                            onDismiss()  
+                            val artistId = artist.id
+                            if (artistId != null && artistId.isNotBlank()) {
+                                navController.navigate("artist/$artistId")  
+                                showSelectArtistDialog = false  
+                                onDismiss()  
+                            } else {
+                                // Show a toast or handle the case where artist ID is null
+                                Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                            }
                         }  
                         .padding(horizontal = 12.dp),  
                 ) {  
@@ -148,9 +155,15 @@ fun YouTubeSongMenu(
                             .fillParentMaxWidth()  
                             .height(ListItemHeight)  
                             .clickable {  
-                                navController.navigate("artist/${artist.id}")  
-                                showSelectArtistDialog = false  
-                                onDismiss()  
+                                val artistId = artist.id
+                                if (artistId != null && artistId.isNotBlank()) {
+                                    navController.navigate("artist/$artistId")  
+                                    showSelectArtistDialog = false  
+                                    onDismiss()  
+                                } else {
+                                    // Show a toast or handle the case where artist ID is null
+                                    Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                                }
                             }  
                             .padding(horizontal = 24.dp),  
                     ) {  
@@ -487,8 +500,14 @@ fun YouTubeSongMenu(
                     },
                     modifier = Modifier.clickable {
                         if (artists.size == 1) {
-                            navController.navigate("artist/${artists[0].id}")
-                            onDismiss()
+                            val artistId = artists[0].id
+                            if (artistId != null && artistId.isNotBlank()) {
+                                navController.navigate("artist/$artistId")
+                                onDismiss()
+                            } else {
+                                // Show a toast or handle the case where artist ID is null
+                                Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             showSelectArtistDialog = true
                         }

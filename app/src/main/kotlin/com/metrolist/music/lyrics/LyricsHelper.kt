@@ -67,7 +67,7 @@ constructor(
 
         val cached = cache.get(mediaMetadata.id)?.firstOrNull()
         if (cached != null) {
-            return cached.lyrics
+            return replaceChinesePureMusicText(cached.lyrics)
         }
 
         val scope = CoroutineScope(SupervisorJob())
@@ -97,7 +97,21 @@ constructor(
 
         val lyrics = deferred.await()
         scope.cancel()
-        return lyrics
+        return replaceChinesePureMusicText(lyrics)
+    }
+
+    /**
+     * Replaces Chinese pure music text with English equivalent
+     */
+    private fun replaceChinesePureMusicText(lyrics: String): String {
+        if (lyrics == LYRICS_NOT_FOUND) {
+            return lyrics
+        }
+        
+        return lyrics.replace("纯音乐, 请欣赏", "Pure Music, Please Enjoy")
+            .replace("纯音乐，请欣赏", "Pure Music, Please Enjoy")
+            .replace("纯音乐", "Pure Music")
+            .replace("请欣赏", "Please Enjoy")
     }
 
     suspend fun getAllLyrics(
@@ -123,7 +137,8 @@ constructor(
                 if (provider.isEnabled(context)) {
                     try {
                         provider.getAllLyrics(mediaId, songTitle, songArtists, duration) { lyrics ->
-                            val result = LyricsResult(provider.name, lyrics)
+                            val processedLyrics = replaceChinesePureMusicText(lyrics)
+                            val result = LyricsResult(provider.name, processedLyrics)
                             allResult += result
                             callback(result)
                         }
