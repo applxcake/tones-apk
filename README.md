@@ -1,5 +1,3 @@
-**This project is based on [Metrolist](https://github.com/mostafaalagamy/Metrolist), originally created by Mostafa Alagamy.**
-
 # Tones
 
 > **Built on [Metrolist](https://github.com/mostafaalagamy/Metrolist) by Mostafa Alagamy**
