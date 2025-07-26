@@ -288,7 +288,10 @@ fun SongListItem(
         ListItem(
             title = song.song.title,
             subtitle = joinByBullet(
-                song.song.artistName ?: song.artists.joinToString { it.name },
+                // Improved artist name logic: try artistName first, then artists relation, then fallback
+                song.song.artistName?.takeIf { it.isNotBlank() } 
+                    ?: song.artists.takeIf { it.isNotEmpty() }?.joinToString { it.name }?.takeIf { it.isNotBlank() }
+                    ?: "Unknown Artist",
                 makeTimeString(song.song.duration * 1000L)
             ),
             badges = badges,
@@ -357,7 +360,10 @@ fun SongGridItem(
     subtitle = {
         Text(
             text = joinByBullet(
-                song.song.artistName ?: song.artists.joinToString { it.name },
+                // Improved artist name logic: try artistName first, then artists relation, then fallback
+                song.song.artistName?.takeIf { it.isNotBlank() } 
+                    ?: song.artists.takeIf { it.isNotEmpty() }?.joinToString { it.name }?.takeIf { it.isNotBlank() }
+                    ?: "Unknown Artist",
                 makeTimeString(song.song.duration * 1000L)
             ),
             style = MaterialTheme.typography.bodyMedium,
@@ -732,7 +738,10 @@ fun MediaMetadataListItem(
     ListItem(
         title = mediaMetadata.title,
         subtitle = joinByBullet(
-            mediaMetadata.artistName ?: mediaMetadata.artists.joinToString { it.name },
+            // Improved artist name logic: try artistName first, then artists relation, then fallback
+            mediaMetadata.artistName?.takeIf { it.isNotBlank() } 
+                ?: mediaMetadata.artists.takeIf { it.isNotEmpty() }?.joinToString { it.name }?.takeIf { it.isNotBlank() }
+                ?: "Unknown Artist",
             makeTimeString(mediaMetadata.duration * 1000L)
         ),
         thumbnailContent = {
@@ -999,7 +1008,7 @@ fun LocalAlbumsGrid(
             thumbnailUrl = thumbnailUrl,
             isActive = isActive,
             isPlaying = isPlaying,
-            shape = RoundedCornerShape(ThumbnailCornerRadius),
+            shape = RoundedCornerShape(12.dp),
             modifier = if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier,
             showCenterPlay = false,
             playButtonVisible = true

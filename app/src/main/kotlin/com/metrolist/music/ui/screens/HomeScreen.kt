@@ -127,6 +127,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.min
 import kotlin.random.Random
+import android.widget.Toast
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -139,6 +140,7 @@ fun HomeScreen(
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
 
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
@@ -264,7 +266,29 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .combinedClickable(
                         onClick = {
-                            navController.navigate("artist/${it.id}")
+                            val artistId = it.id
+                            if (artistId.isNotBlank() && it.artist.isYouTubeArtist) {
+                                navController.navigate("artist/$artistId")
+                            } else {
+                                // Try to search YouTube for the artist name
+                                val artistName = it.artist.name
+                                val contextCopy = context
+                                val navControllerCopy = navController
+                                val hapticCopy = haptic
+                                val menuStateCopy = menuState
+                                val scopeCopy = scope
+                                scope.launch {
+                                    val result = com.metrolist.innertube.YouTube.search(artistName, com.metrolist.innertube.YouTube.SearchFilter.FILTER_ARTIST).getOrNull()
+                                    val ytArtist = result?.items?.firstOrNull { item ->
+                                        item is com.metrolist.innertube.models.ArtistItem && !item.id.isNullOrBlank()
+                                    } as? com.metrolist.innertube.models.ArtistItem
+                                    if (ytArtist != null) {
+                                        navControllerCopy.navigate("artist/${ytArtist.id}")
+                                    } else {
+                                        Toast.makeText(contextCopy, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
                         },
                         onLongClick = {
                             haptic.performHapticFeedback(
@@ -305,7 +329,15 @@ fun HomeScreen(
                             )
 
                             is AlbumItem -> navController.navigate("album/${item.id}")
-                            is ArtistItem -> navController.navigate("artist/${item.id}")
+                            is ArtistItem -> {
+                                val artistId = item.id
+                                if (artistId.isNotBlank()) {
+                                    navController.navigate("artist/$artistId")
+                                } else {
+                                    // Show a toast or handle the case where artist ID is null
+                                    Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                             is PlaylistItem -> navController.navigate("online_playlist/${item.id}")
                         }
                     },
@@ -499,7 +531,7 @@ fun HomeScreen(
                         thumbnail = {
                             if (url != null) {
                                 AsyncImage(
-                                    model = ImageRequest.Builder(LocalContext.current)
+                                    model = ImageRequest.Builder(context)
                                         .data(url)
                                         .diskCachePolicy(CachePolicy.ENABLED)
                                         .diskCacheKey(url)
@@ -653,7 +685,15 @@ fun HomeScreen(
                             when (it.title) {
                                 is Song -> navController.navigate("album/${it.title.album!!.id}")
                                 is Album -> navController.navigate("album/${it.title.id}")
-                                is Artist -> navController.navigate("artist/${it.title.id}")
+                                is Artist -> {
+                                    val artistId = it.title.id
+                                    if (artistId.isNotBlank() && (it.title as? Artist)?.artist?.isYouTubeArtist == true) {
+                                        navController.navigate("artist/$artistId")
+                                    } else {
+                                        // Show a toast or handle the case where artist ID is null or not a YouTube artist
+                                        Toast.makeText(context, "Artist profile not available", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                                 is Playlist -> {}
                             }
                         },

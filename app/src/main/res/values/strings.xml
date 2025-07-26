@@ -211,6 +211,7 @@
     <string name="error_no_internet">No network connection</string>
     <string name="error_timeout">Timeout</string>
     <string name="error_unknown">Unknown error</string>
+    <string name="error_no_equalizer">No equalizer app found on this device</string>
 
     <!-- Player action -->
     <string name="action_like">Like</string>

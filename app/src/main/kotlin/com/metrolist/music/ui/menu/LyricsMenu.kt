@@ -56,6 +56,8 @@ import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.ListDialog
 import com.metrolist.music.ui.component.TextFieldDialog
 import com.metrolist.music.viewmodels.LyricsMenuViewModel
+import androidx.navigation.NavController
+import android.media.audiofx.AudioEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +65,7 @@ fun LyricsMenu(
     lyricsProvider: () -> LyricsEntity?,
     mediaMetadataProvider: () -> MediaMetadata,
     onDismiss: () -> Unit,
+    navController: NavController, // <-- Add this parameter
     viewModel: LyricsMenuViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -352,6 +355,62 @@ fun LyricsMenu(
                 },
                 modifier = Modifier.clickable {
                     showSearchDialog = true
+                }
+            )
+        }
+        item {
+            ListItem(
+                headlineContent = { Text(text = stringResource(R.string.view_artist)) },
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(R.drawable.person),
+                        contentDescription = null,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    onDismiss()
+                    val artistId = mediaMetadataProvider().artists.firstOrNull()?.id
+                    if (artistId != null) {
+                        navController.navigate("artist/$artistId")
+                    }
+                }
+            )
+        }
+        item {
+            ListItem(
+                headlineContent = { Text(text = stringResource(R.string.view_album)) },
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(R.drawable.album),
+                        contentDescription = null,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    onDismiss()
+                    val albumId = mediaMetadataProvider().album?.id
+                    if (albumId != null) {
+                        navController.navigate("album/$albumId")
+                    }
+                }
+            )
+        }
+        item {
+            ListItem(
+                headlineContent = { Text(text = stringResource(R.string.equalizer)) },
+                leadingContent = {
+                    Icon(
+                        painter = painterResource(R.drawable.equalizer),
+                        contentDescription = null,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    onDismiss()
+                    try {
+                        val intent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, context.getString(R.string.error_no_equalizer), Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
         }

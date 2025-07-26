@@ -71,12 +71,14 @@ import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Thumbnail(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
+    navController: NavController, // Add this parameter
 ) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val context = LocalContext.current
@@ -196,7 +198,7 @@ fun Thumbnail(
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
-            Lyrics(sliderPositionProvider = sliderPositionProvider)
+            Box { Lyrics(sliderPositionProvider = sliderPositionProvider, navController = navController) }
         }
 
         // Error view
@@ -283,30 +285,47 @@ fun Thumbnail(
                         ) {
                             Box(
                                 modifier = Modifier
+                                    .padding(12.dp)
                                     .size(containerMaxWidth - (PlayerHorizontalPadding * 2))
-                                    .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
-                                    .shadow(12.dp, RoundedCornerShape(ThumbnailCornerRadius * 2)) // Add shadow for 3D effect
                             ) {
-                                // Blurred background
-                                AsyncImage(
-                                    model = item.mediaMetadata.artworkUri?.toString(),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.FillBounds,
+                                // Blurred background (no shadow)
+                                Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .graphicsLayer(
-                                            renderEffect = BlurEffect(radiusX = 75f, radiusY = 75f),
-                                            alpha = 0.5f
+                                        .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
+                                ) {
+                                    AsyncImage(
+                                        model = item.mediaMetadata.artworkUri?.toString(),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.FillBounds,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .graphicsLayer(
+                                                renderEffect = BlurEffect(radiusX = 75f, radiusY = 75f),
+                                                alpha = 0.5f
+                                            )
+                                    )
+                                }
+                                
+                                // Main image with shadow on top
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
+                                        .shadow(
+                                            elevation = 20.dp,
+                                            shape = RoundedCornerShape(ThumbnailCornerRadius * 2),
+                                            ambientColor = Color.Black.copy(alpha = 0.35f),
+                                            spotColor = Color.Black.copy(alpha = 0.35f)
                                         )
-                                )
-
-                                // Main image
-                                AsyncImage(
-                                    model = item.mediaMetadata.artworkUri?.toString(),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                                ) {
+                                    AsyncImage(
+                                        model = item.mediaMetadata.artworkUri?.toString(),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             }
                         }
                     }

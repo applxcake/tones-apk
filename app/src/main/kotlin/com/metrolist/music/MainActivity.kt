@@ -184,6 +184,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalConfiguration
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
@@ -253,6 +254,13 @@ class MainActivity : ComponentActivity() {
         } else {
             pendingIntent = intent
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Force recomposition to handle split-screen and other configuration changes
+        // This prevents the white block issue after split-screen mode
+        setSystemBarAppearance(newConfig.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES)
     }
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -341,6 +349,11 @@ class MainActivity : ComponentActivity() {
                 pureBlack = pureBlack,
                 themeColor = themeColor,
             ) {
+                // Force recomposition on configuration changes to prevent white block issue
+                LaunchedEffect(LocalConfiguration.current) {
+                    // This will trigger recomposition when configuration changes
+                }
+                
                 BoxWithConstraints(
                     modifier =
                     Modifier
@@ -627,14 +640,14 @@ class MainActivity : ComponentActivity() {
                                                     androidx.compose.foundation.Image(
                                                         painter = painterResource(id = R.drawable.logo),
                                                         contentDescription = "Tones Logo",
-                                                        modifier = Modifier.size(28.dp)
+                                                        modifier = Modifier.size(44.dp)
                                                     )
                                                     Text(
                                                         text = "Tones",
                                                         style = MaterialTheme.typography.titleLarge,
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(start = 10.dp)
+                                                        modifier = Modifier.padding(start = 4.dp)
                                                     )
                                                 }
                                             } else {
