@@ -2,7 +2,7 @@
 
 > **Built on [Metrolist](https://github.com/mostafaalagamy/Metrolist) by Mostafa Alagamy**
 
-![Version](https://img.shields.io/badge/version-2.5.0-blue)
+![Version](https://img.shields.io/badge/version-2.5.5-blue)
 
 A custom music streaming app built on top of Metrolist with enhanced features.
 
